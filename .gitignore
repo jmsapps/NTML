@@ -2,5 +2,6 @@ base
 base.nim
 htmlgentest
 htmlgentest.nim
+ntml
 playground
 playground.nim
