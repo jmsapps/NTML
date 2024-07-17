@@ -20,11 +20,6 @@ template terminalTag(tag: untyped) =
   template `tag`(children: string) =
     result.add("<" & astToStr(tag) & ">" & children & "</" & astToStr(tag) & ">")
 
-macro ntmlMap(listArr: untyped, listItem: untyped, expression: untyped) =
-  quote do:
-    for `listItem` in `listArr`:
-      `expression`
-
 nonTerminalTag body
 nonTerminalTag head
 nonTerminalTag dv
