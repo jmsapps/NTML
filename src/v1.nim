@@ -31,7 +31,7 @@ template styled(name: untyped, tag: untyped, style: string = "") =
 
     var styleAttr = ""
     if style != "":
-      styleAttr = " style=\"" & style.strip() & "\" "
+      styleAttr = " style=\"" & style.replace("\n", "")
 
     for arg in args:
       case arg.kind
@@ -39,14 +39,16 @@ template styled(name: untyped, tag: untyped, style: string = "") =
         child = arg
       of nnkExprEqExpr:
         if $arg[0] == "style":
-          let newStyleAttr = styleAttr.substr(0, styleAttr.len - 3)
-          styleAttr = newStyleAttr & $arg[1] & "\" "
+          styleAttr = styleAttr & $arg[1]
         else:
           attributes.add($arg.repr & " ")
       of nnkCall:
         attributes.add($arg.repr & " ")
       else:
         discard
+
+    if style != "":
+      styleAttr.add("\" ")
 
     let formattedTag = astToStr(tag).replace("`", "")
     let tagType = getTagType(formattedTag)
@@ -121,8 +123,8 @@ component MyComponent:
 component MyComponent2:
   StyledDiv:
     StyledH1(
-      id = 2,
-      onclick = handleClick()
+      id=2,
+      onclick=handleClick()
     ):
       "Hello another world"
     StyledImg:
