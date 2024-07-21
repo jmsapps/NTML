@@ -14,18 +14,19 @@ proc getTagType(tag: string): string =
   if tag in ntmlCompositeElements:
     result = "composite"
 
-template html(name: untyped, matter: untyped) =
-  proc `name`(): string =
+template html*(name: untyped, matter: untyped) =
+  proc `name`*(): string =
     result = "<html>"
     matter
     result.add("</html>")
 
-template component(name: untyped, matter: untyped) =
-  template `name`() =
-    matter
+template component*[T](name: untyped,  matter: untyped) =
+  macro `name`*(props: T) =
+    quote do:
+      matter
 
-template styled(name: untyped, tag: untyped, style: string = "") =
-  macro `name`(args: varargs[untyped]): untyped =
+template styled*(name: untyped, tag: untyped, style: string = "") =
+  macro `name`*(args: varargs[untyped]): untyped =
     var child: NimNode
     var attributes = ""
 
@@ -114,26 +115,33 @@ styled(StyledDiv, `div`): """
 proc handleClick() =
   echo "I am a button click"
 
-component MyComponent:
+type
+  MyComponentProps = object of RootObj
+    key: string
+
+let props = MyComponentProps(key: "HELLO WORLD")
+
+component[MyComponentProps](MyComponent):
   StyledH1(id = 1, style = "color: #000;"):
-    "Hello world"
+    props.key
   StyledButton(handleClick()):
     "Click me!"
 
-component MyComponent2:
+component[void](MyOtherComponent):
   StyledDiv:
     StyledH1(
       id=2,
       onclick=handleClick()
     ):
       "Hello another world"
-    StyledImg:
-      src = "img_girl.jpg"
+    StyledImg(
+      src="img_girl.jpg",
       alt="Girl in a jacket"
+    )
 
 html app:
   body:
-    MyComponent
-    MyComponent2
+    MyComponent(props)
+    MyOtherComponent
 
 echo app()
