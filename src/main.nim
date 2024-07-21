@@ -129,11 +129,11 @@ component[MyComponentProps](MyComponent):
 
 component[void](MyOtherComponent):
   StyledDiv:
-    StyledH1(
-      id=2,
-      onclick=handleClick()
-    ):
+    StyledH1(id=2, onclick=handleClick()):
       "Hello another world"
+
+    MyComponent(props)
+
     StyledImg(
       src="img_girl.jpg",
       alt="Girl in a jacket"
@@ -141,7 +141,6 @@ component[void](MyOtherComponent):
 
 html app:
   body:
-    MyComponent(props)
     MyOtherComponent
 
 echo app()
