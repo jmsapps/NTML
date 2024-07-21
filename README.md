@@ -1,5 +1,5 @@
 # NTML
 
-An HTML DSL for Nim built on top of `htmlgen`.
+A component-based HTML DSL for Nim.
 
 more to come...
