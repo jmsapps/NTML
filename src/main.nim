@@ -20,7 +20,7 @@ template html*(name: untyped, matter: untyped) =
     matter
     result.add("</html>")
 
-template component*[T](name: untyped,  matter: untyped) =
+template component*[T](name: untyped, matter: untyped) =
   macro `name`*(props: T) =
     quote do:
       matter
@@ -42,14 +42,14 @@ template styled*(name: untyped, tag: untyped, style: string = "") =
         if $arg[0] == "style":
           styleAttr = styleAttr & $arg[1]
         else:
-          attributes.add($arg.repr & " ")
+          attributes.add(" " & $arg.repr)
       of nnkCall:
-        attributes.add($arg.repr & " ")
+        attributes.add(" " & $arg.repr)
       else:
         discard
 
     if style != "":
-      styleAttr.add("\" ")
+      styleAttr.add("\"")
 
     let formattedTag = astToStr(tag).replace("`", "")
     let tagType = getTagType(formattedTag)
@@ -105,6 +105,10 @@ styled(StyledButton, button): """
 """
 
 styled(body, body)
+styled(button, button)
+styled(dv, `div`)
+styled(h1, h1)
+styled(img, img)
 
 styled(StyledDiv, `div`): """
   background-color: #eee;
@@ -124,20 +128,23 @@ let props = MyComponentProps(key: "HELLO WORLD")
 component[MyComponentProps](MyComponent):
   StyledH1(id = 1, style = "color: #000;"):
     props.key
-  StyledButton(handleClick()):
+  StyledButton(onclick=handleClick()):
     "Click me!"
 
 component[void](MyOtherComponent):
   StyledDiv:
-    StyledH1(id=2, onclick=handleClick()):
-      "Hello another world"
-
     MyComponent(props)
+    StyledH1(id=2): "Hello another world"
 
     StyledImg(
       src="img_girl.jpg",
       alt="Girl in a jacket"
     )
+
+    dv:
+      h1: "hello world a third time"
+      button(onclick=handleClick()):
+        "Click me too!"
 
 html app:
   body:
