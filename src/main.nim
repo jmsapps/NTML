@@ -3,8 +3,8 @@ import macros, strutils
 
 import types
 
-proc getNtmlElementKind(ntmlKind: NtmlKind): NtmlElementKind =
-  case ntmlKind
+proc getNtmlElementKind(ntmlTagKind: NtmlTagKind): NtmlElementKind =
+  case ntmlTagKind
   of
     `img`:
       result = `voidElement`
@@ -17,20 +17,20 @@ proc getNtmlElementKind(ntmlKind: NtmlKind): NtmlElementKind =
     `div`:
       result = `compositeElement`
 
-template html*(name: untyped, matter: untyped) =
+template html*(name: untyped, children: untyped) =
   proc `name`*(): string =
     result = "<html>"
-    matter
+    children
     result.add("</html>")
 
-template component*[T](name: untyped, matter: untyped) =
+template component*[T](name: untyped, children: untyped) =
   macro `name`*(props: T) =
     quote do:
-      matter
+      children
 
-template styled*(name: untyped, ntmlKind: NtmlKind, style: string = "") =
+template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
   macro `name`*(args: varargs[untyped]): untyped =
-    var child: NimNode
+    var children: NimNode
     var attributes = ""
 
     var styleAttr = ""
@@ -40,7 +40,7 @@ template styled*(name: untyped, ntmlKind: NtmlKind, style: string = "") =
     for arg in args:
       case arg.kind
       of nnkStmtList:
-        child = arg
+        children = arg
       of nnkExprEqExpr:
         if $arg[0] == "style":
           styleAttr = styleAttr & $arg[1]
@@ -54,8 +54,8 @@ template styled*(name: untyped, ntmlKind: NtmlKind, style: string = "") =
     if style != "":
       styleAttr.add("\"")
 
-    let ntmlElementKind = getNtmlElementKind(ntmlKind)
-    let formattedTag = astToStr(ntmlKind).replace("`", "")
+    let ntmlElementKind = getNtmlElementKind(ntmlTagKind)
+    let formattedTag = astToStr(ntmlTagKind).replace("`", "")
     var openTagStr: string
     var closeTagStr: string
 
@@ -66,7 +66,7 @@ template styled*(name: untyped, ntmlKind: NtmlKind, style: string = "") =
 
       result = newStmtList(
         newCall("add", ident("result"), newLit(openTagStr)),
-        child,
+        children,
         newCall("add", ident("result"), newLit(closeTagStr))
       )
 
@@ -76,7 +76,7 @@ template styled*(name: untyped, ntmlKind: NtmlKind, style: string = "") =
 
       result = newStmtList(
         newCall("add", ident("result"), newLit(openTagStr)),
-        newCall("add", ident("result"), newCall("$", child)),
+        newCall("add", ident("result"), newCall("$", children)),
         newCall("add", ident("result"), newLit(closeTagStr))
       )
 

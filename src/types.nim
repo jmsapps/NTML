@@ -1,5 +1,5 @@
 type
-  NtmlKind* = enum
+  NtmlTagKind* = enum
     `img`,
     `h1`,
     `button`,
