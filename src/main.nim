@@ -1,18 +1,21 @@
+
 import macros, strutils
 
-const ntmlVoidElements: array[1, string] = ["img"]
-const ntmlAtomicElements: array[2, string] = ["h1", "button"]
-const ntmlCompositeElements: array[2, string] = ["body", "div"]
+import types
 
-proc getTagType(tag: string): string =
-  result = "unknown"
-
-  if tag in ntmlVoidElements:
-    result = "void"
-  if tag in ntmlAtomicElements:
-    result = "atomic"
-  if tag in ntmlCompositeElements:
-    result = "composite"
+proc getNtmlElementKind(ntmlKind: NtmlKind): NtmlElementKind =
+  case ntmlKind
+  of
+    `img`:
+      result = `voidElement`
+  of
+    `h1`,
+    `button`:
+      result = `atomicElement`
+  of
+    `body`,
+    `div`:
+      result = `compositeElement`
 
 template html*(name: untyped, matter: untyped) =
   proc `name`*(): string =
@@ -25,7 +28,7 @@ template component*[T](name: untyped, matter: untyped) =
     quote do:
       matter
 
-template styled*(name: untyped, tag: untyped, style: string = "") =
+template styled*(name: untyped, ntmlKind: NtmlKind, style: string = "") =
   macro `name`*(args: varargs[untyped]): untyped =
     var child: NimNode
     var attributes = ""
@@ -51,51 +54,49 @@ template styled*(name: untyped, tag: untyped, style: string = "") =
     if style != "":
       styleAttr.add("\"")
 
-    let formattedTag = astToStr(tag).replace("`", "")
-    let tagType = getTagType(formattedTag)
-    var tagStr: string
+    let ntmlElementKind = getNtmlElementKind(ntmlKind)
+    let formattedTag = astToStr(ntmlKind).replace("`", "")
+    var openTagStr: string
     var closeTagStr: string
 
-    if tagType == "composite":
-      tagStr = "<" & formattedTag & styleAttr & attributes & ">"
+    case ntmlElementKind
+    of `compositeElement`:
+      openTagStr = "<" & formattedTag & styleAttr & attributes & ">"
       closeTagStr = "</" & formattedTag & ">"
 
       result = newStmtList(
-        newCall("add", ident("result"), newLit(tagStr)),
+        newCall("add", ident("result"), newLit(openTagStr)),
         child,
         newCall("add", ident("result"), newLit(closeTagStr))
       )
 
-    elif tagType == "atomic":
-      tagStr = "<" & formattedTag & styleAttr & attributes & ">"
+    of `atomicElement`:
+      openTagStr = "<" & formattedTag & styleAttr & attributes & ">"
       closeTagStr = "</" & formattedTag & ">"
 
       result = newStmtList(
-        newCall("add", ident("result"), newLit(tagStr)),
+        newCall("add", ident("result"), newLit(openTagStr)),
         newCall("add", ident("result"), newCall("$", child)),
         newCall("add", ident("result"), newLit(closeTagStr))
       )
 
-    elif tagType == "void":
-      tagStr = "<" & formattedTag & styleAttr & attributes & "/>"
+    of `voidElement`:
+      openTagStr = "<" & formattedTag & styleAttr & attributes & "/>"
 
-      result = newStmtList(newCall("add", ident("result"), newLit(tagStr)))
+      result = newStmtList(newCall("add", ident("result"), newLit(openTagStr)))
 
-    else:
-      result = newStmtList(newCall("add", ident("result"), newLit(tagStr)))
-
-styled(StyledImg, img): """
+styled(StyledImg, `img`): """
   background-color: #000;
   width: 100px;
 """
 
-styled(StyledH1, h1): """
+styled(StyledH1, `h1`): """
   color: #f7d;
   font-size: 40px;
   font-weight: 600;
 """
 
-styled(StyledButton, button): """
+styled(StyledButton, `button`): """
   background-color: #eee;
   width: 200px;
   height: 50px;
@@ -104,11 +105,11 @@ styled(StyledButton, button): """
   font-weight: 600;
 """
 
-styled(body, body)
-styled(button, button)
+styled(body, `body`)
+styled(button, `button`)
 styled(dv, `div`)
-styled(h1, h1)
-styled(img, img)
+styled(h1, `h1`)
+styled(img, `img`)
 
 styled(StyledDiv, `div`): """
   background-color: #eee;
@@ -119,35 +120,14 @@ styled(StyledDiv, `div`): """
 proc handleClick() =
   echo "I am a button click"
 
-type
-  MyComponentProps = object of RootObj
-    key: string
-
-let props = MyComponentProps(key: "HELLO WORLD")
-
-component[MyComponentProps](MyComponent):
-  StyledH1(id = 1, style = "color: #000;"):
-    props.key
-  StyledButton(onclick=handleClick()):
-    "Click me!"
-
-component[void](MyOtherComponent):
+component[void](MyComponent):
   StyledDiv:
-    MyComponent(props)
-    StyledH1(id=2): "Hello another world"
-
-    StyledImg(
-      src="img_girl.jpg",
-      alt="Girl in a jacket"
-    )
-
-    dv:
-      h1: "hello world a third time"
-      button(onclick=handleClick()):
-        "Click me too!"
+    h1: "hello world a third time"
+    button(onclick=handleClick()):
+      "Click me too!"
 
 html app:
   body:
-    MyOtherComponent
+    MyComponent
 
 echo app()
