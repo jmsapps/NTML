@@ -85,31 +85,8 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
 
       result = newStmtList(newCall("add", ident("result"), newLit(openTagStr)))
 
-styled(StyledImg, `img`): """
-  background-color: #000;
-  width: 100px;
-"""
-
-styled(StyledH1, `h1`): """
-  color: #f7d;
-  font-size: 40px;
-  font-weight: 600;
-"""
-
-styled(StyledButton, `button`): """
-  background-color: #eee;
-  width: 200px;
-  height: 50px;
-  border: 1px solid #000;
-  border-radius: 8px;
-  font-weight: 600;
-"""
-
 styled(body, `body`)
-styled(button, `button`)
-styled(dv, `div`)
 styled(h1, `h1`)
-styled(img, `img`)
 
 styled(StyledDiv, `div`): """
   background-color: #eee;
@@ -117,14 +94,9 @@ styled(StyledDiv, `div`): """
   border-radius: 20px;
 """
 
-proc handleClick() =
-  echo "I am a button click"
-
 component[void](MyComponent):
   StyledDiv:
     h1: "hello world a third time"
-    button(onclick=handleClick()):
-      "Click me too!"
 
 html app:
   body:
