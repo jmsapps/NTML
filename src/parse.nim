@@ -11,17 +11,17 @@ proc parseCss*(css: string): (string, seq[NtmlStyleArg]) =
   if ":nim" in cssBlock:
     try:
       var cssBlockStart = cssBlock.find(":nim")
-      cssBlockStart = cssBlock.find("{", cssBlockStart)
+      cssBlockStart = cssBlock.find("${", cssBlockStart)
       if cssBlockStart == -1:
-        raise newException(ValueError, "Syntax error: '{' not found after ':nim'")
+        raise newException(ValueError, "Syntax error: '${' not found after ':nim'")
 
-      let cssBlockEnd = cssBlock.find("}", cssBlockStart)
+      let cssBlockEnd = cssBlock.find("}$", cssBlockStart)
       if cssBlockEnd == -1:
-        raise newException(ValueError, "Syntax error: '}' not found after '{'")
+        raise newException(ValueError, "Syntax error: '}$' not found after '${'")
 
       if cssBlockStart != -1 and cssBlockEnd != -1:
         nimBlock = cssBlock[cssBlockStart+6..cssBlockEnd-2]
-        cssBlock = cssBlock[0..cssBlockStart-1] & cssBlock[cssBlockEnd+1..^1]
+        cssBlock = cssBlock[0..cssBlockStart+1] & cssBlock[cssBlockEnd..^1]
 
       let singleLineNimBlock = nimBlock.replace("\n", "")
 
@@ -35,6 +35,9 @@ proc parseCss*(css: string): (string, seq[NtmlStyleArg]) =
             thenCond: part[thenStart ..< part.find("ELSE")].strip(),
             elseCond: part[elseStart .. ^1].strip()
           ))
+        elif part.strip() != "":
+          raise newException(ValueError, "Syntax error: one of 'IF', 'THEN', or 'ELSE' missing")
+
     except ValueError as e:
       cssBlock = ""
       echo "ValueError: ", e.msg
@@ -42,4 +45,8 @@ proc parseCss*(css: string): (string, seq[NtmlStyleArg]) =
       cssBlock = ""
       echo "General error: ", e.msg
 
-  result = (cssBlock.replace("\n", "").replace(" ", "").replace(":nim", ""), styleArgs)
+
+  result = (
+    cssBlock.replace("\n", "").replace(" ", "").replace(":nim", "").replace("${}$", ""),
+    styleArgs
+  )
