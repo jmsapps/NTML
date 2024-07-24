@@ -3,17 +3,18 @@ import strutils
 
 import types, errors
 
-proc parseCss*(css: string): (string, seq[NtmlStyleArg]) =
+proc parseNcss*(css: string): (string, seq[NtmlStyleArg]) =
   var styleArgs: seq[NtmlStyleArg]
   var nimBlock = ""
   var cssBlock = css
 
   if ":ncss" in cssBlock:
     try:
-      let ifCount = cssBlock.count("IF ")
-      let thenCount = cssBlock.count("THEN ")
-      let elseCount = cssBlock.count("ELSE ")
-      let endCount = cssBlock.count("END")
+      let singleLineCssBlock = cssBlock.replace("\n", "")
+      let ifCount = singleLineCssBlock.count("IF ")
+      let thenCount = singleLineCssBlock.count("THEN ")
+      let elseCount = singleLineCssBlock.count("ELSE ")
+      let endCount = singleLineCssBlock.count("END")
 
       if ifCount != thenCount or thenCount != elseCount or elseCount != endCount:
         raise newException(
@@ -21,7 +22,7 @@ proc parseCss*(css: string): (string, seq[NtmlStyleArg]) =
           cssBlock & "\'"
         )
 
-      if ifCount == 0 and thenCount == 0 and elseCount == 0 and endCount == 0:
+      if ifCount == 0 or thenCount == 0 or elseCount == 0 or endCount == 0:
         raise newException(
           SyntaxError, "at least one of 'IF', 'THEN', 'ELSE', 'END' statements required in \'\n" &
           cssBlock & "\'"
@@ -43,19 +44,31 @@ proc parseCss*(css: string): (string, seq[NtmlStyleArg]) =
       let singleLineNimBlock = nimBlock.replace("\n", "").strip()
 
       for part in singleLineNimBlock.split("END"):
-        let ifStart = part.find("IF ") + 3
-        let thenStart = part.find("THEN ") + 5
-        let elseStart = part.find("ELSE ") + 5
+        let strippedPart = "\'" & part.replace("  ", " ").strip() & "\'"
 
-        let ifPart = part[ifStart ..< part.find("THEN")].strip()
-        let thenPart = part[thenStart ..< part.find("ELSE")].strip()
-        let elsePart = part[elseStart .. ^1].strip()
+        if "IF " in part and "THEN " in part and "ELSE " in part:
+          let ifStart = part.find("IF ") + 3
+          let thenStart = part.find("THEN ") + 5
+          let elseStart = part.find("ELSE ") + 5
 
-        styleArgs.add(NtmlStyleArg(
-          ifCond: ifPart,
-          thenCond: thenPart,
-          elseCond: elsePart
-        ))
+          let ifPart = part[ifStart ..< part.find("THEN")].strip()
+          let thenPart = part[thenStart ..< part.find("ELSE")].strip()
+          let elsePart = part[elseStart .. ^1].strip()
+
+          if ifPart == "":
+            raise newException(SyntaxError, "missing 'IF' condition in " & strippedPart)
+          if thenPart == "":
+            raise newException(SyntaxError, "missing 'THEN' condition in " & strippedPart)
+          if elsePart == "":
+            raise newException(SyntaxError, "missing 'ELSE' condition in " & strippedPart)
+
+          styleArgs.add(NtmlStyleArg(
+            ifCond: ifPart,
+            thenCond: thenPart,
+            elseCond: elsePart
+          ))
+        elif part.strip() != "":
+          raise newException(SyntaxError, "'IF', 'THEN', and/or 'ELSE' missing in" & strippedPart)
 
     except SyntaxError as e:
       cssBlock = "background-color: #E90909 !important; "

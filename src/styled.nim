@@ -14,7 +14,7 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
     var inlineStyles = ""
 
     var styleAttr = " style=\""
-    let (parsedCss, cssStyleArgs) = parseCss(style)
+    let (parsedCss, cssStyleArgs) = parseNcss(style)
     if parsedCss != "":
       styleAttr = styleAttr & parsedCss
 
