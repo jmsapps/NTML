@@ -40,7 +40,7 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
           if key == "style":
             inlineStyles.add(" " & value)
           else:
-            attributes.add(" " & $arg.repr)
+            attributes.add(" " & $arg.repr.replace(" ", ""))
       of nnkIdent:
         var found = false
 
@@ -74,6 +74,9 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
 
     styleAttr.add(inlineStyles & "\"")
 
+    if not attributes.strip().contains("id="):
+      attributes = " id=\"" & astToStr(name).toLowerAscii() & "\"" & attributes
+
     let ntmlElementKind = getNtmlElementKind(ntmlTagKind)
     let formattedTag = astToStr(ntmlTagKind).replace("`", "")
     var openTagStr: string
@@ -81,7 +84,7 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
 
     case ntmlElementKind
     of `compositeElement`:
-      openTagStr = "<" & formattedTag & styleAttr & attributes & ">"
+      openTagStr = "<" & formattedTag & attributes & styleAttr & ">"
       closeTagStr = "</" & formattedTag & ">"
 
       result = newStmtList(
@@ -91,7 +94,7 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
       )
 
     of `atomicElement`:
-      openTagStr = "<" & formattedTag & styleAttr & attributes & ">"
+      openTagStr = "<" & formattedTag & attributes & styleAttr &  ">"
       closeTagStr = "</" & formattedTag & ">"
 
       result = newStmtList(

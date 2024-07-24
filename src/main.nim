@@ -1,5 +1,5 @@
 
-import macros
+import macros, strutils
 
 import htmlElements, styled
 
@@ -14,6 +14,7 @@ template html*(name: untyped, children: untyped) =
 
 template component*[T](name: untyped, children: untyped) =
   macro `name`*(props: T) =
+    # result = newTree(nnkStmtList, parseStmt(astToStr(children)))
     quote do:
       children
 
@@ -21,7 +22,7 @@ template component*[T](name: untyped, children: untyped) =
 styled(StyledDiv, `div`): """
   padding: 24px;
 
-  :nim  ${
+  :ncss  ${
     IF isBorder THEN border: 1px solid #000; border-radius: 20px; ELSE VOID END
     IF bgColor THEN background-color: bgColor; ELSE background-color: #FFF; END
 
@@ -35,17 +36,22 @@ styled(StyledDiv, `div`): """
   }$
 """
 
-component[void](MyComponent):
+type
+  MyProp = object
+    text: string
+
+component[MyProp](MyComponent):
   StyledDiv(
     bgColor="#eee",
     isBorder,
     isHideOnHover,
-    style="margin-top: 100px;"
+    style="margin-top: 100px;",
+    class="myclass"
   ):
     h1: "HELLO WORLD"
 
 html app:
   body:
-    MyComponent
+    MyComponent(MyProp(text:"HELLO WORLD"))
 
 echo app()
