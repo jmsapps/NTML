@@ -41,6 +41,17 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
             inlineStyles.add(" " & value)
           else:
             attributes.add(" " & $arg.repr)
+      of nnkIdent:
+        var found = false
+
+        for styleArg in cssStyleArgs:
+          if styleArg.ifCond == $arg:
+            includedStyleArgs.add((styleArg, ""))
+            found = true
+            break
+
+        if not found:
+          attributes.add(" " & $arg.repr)
       else:
         discard
 

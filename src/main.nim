@@ -23,22 +23,25 @@ styled(StyledDiv, `div`): """
 
   :nim  ${
     IF isBorder THEN border: 1px solid #000; border-radius: 20px; ELSE VOID END
-    IF bgColor THEN background-color: bgColor; ELSE VOID END
+    IF bgColor THEN background-color: bgColor; ELSE background-color: #FFF; END
 
-    IF
-      isHideOnHover
+    IF isHideOnHover
     THEN
       :hover {
         opacity: 0;
       }
-    ELSE
-      VOID
+    ELSE VOID
     END
   }$
 """
 
 component[void](MyComponent):
-  StyledDiv(bgColor="#eee", isBorder="", style="margin-top: 100px;", isHideOnHover=""):
+  StyledDiv(
+    bgColor="#eee",
+    isBorder,
+    isHideOnHover,
+    style="margin-top: 100px;"
+  ):
     h1: "HELLO WORLD"
 
 html app:
