@@ -11,14 +11,12 @@ template newHtmlElement(name: untyped) =
 
     for arg in args:
       case arg.kind
-      # call and stmt list accounts for inline or new line children
       of nnkStmtList:
         children = arg
       of nnkCall:
-        attributes.add(" " & $arg.repr)
-      # attributes and style arguments
+        attributes.add(" " & $arg.repr.replace(" ", ""))
       of nnkExprEqExpr:
-         attributes.add(" " & $arg.repr)
+         attributes.add(" " & $arg.repr.replace(" ", ""))
       else:
         discard
 
@@ -59,3 +57,5 @@ newHtmlElement `h1`
 newHtmlElement `button`
 newHtmlElement `body`
 newHtmlElement `div`
+newHtmlElement `ul`
+newHtmlElement `li`

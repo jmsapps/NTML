@@ -4,7 +4,9 @@ type
     `h1`,
     `button`,
     `body`,
-    `div`
+    `div`,
+    `li`,
+    `ul`
 
   NtmlElementKind* = enum
     `voidElement`,

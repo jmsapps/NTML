@@ -31,15 +31,14 @@ proc parseNcss*(css: string): (string, seq[NtmlStyleArg]) =
       var cssBlockStart = cssBlock.find(":ncss")
       cssBlockStart = cssBlock.find("${", cssBlockStart)
       if cssBlockStart == -1:
-        raise newException(SyntaxError, "Syntax error: '${' not found after ':ncss'")
+        raise newException(SyntaxError, "'${' not found after ':ncss'")
 
       let cssBlockEnd = cssBlock.find("}$", cssBlockStart)
       if cssBlockEnd == -1:
-        raise newException(SyntaxError, "Syntax error: '}$' not found after '${'")
+        raise newException(SyntaxError, "'}$' not found after '${'")
 
-      if cssBlockStart != -1 and cssBlockEnd != -1:
-        nimBlock = cssBlock[cssBlockStart+6..cssBlockEnd-2]
-        cssBlock = cssBlock[0..cssBlockStart+1] & cssBlock[cssBlockEnd..^1]
+      nimBlock = cssBlock[cssBlockStart+6..cssBlockEnd-2]
+      cssBlock = cssBlock[0..cssBlockStart+1] & cssBlock[cssBlockEnd..^1]
 
       let singleLineNimBlock = nimBlock.replace("\n", "").strip()
 
