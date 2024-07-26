@@ -1,6 +1,6 @@
 # NTML
 
-# Project Overview
+## Project Overview
 
 NTML is a work-in-progress Nim-based framework for building HTML elements and styling them using a custom DSL (Domain Specific Language). It includes the ability to define components with styled elements and conditional styling rules.
 
