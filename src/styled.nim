@@ -20,12 +20,9 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
 
     for arg in args:
       case arg.kind
-      # call and stmt list accounts for inline or new line children
       of nnkStmtList:
         children = arg
-      of nnkCall:
-        attributes.add(" " & $arg.repr)
-      # attributes and style arguments
+
       of nnkExprEqExpr:
         let (key, value) = ($arg[0], $arg[1])
         var found = false
@@ -41,6 +38,7 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
             inlineStyles.add(" " & value)
           else:
             attributes.add(" " & $arg.repr.replace(" ", ""))
+
       of nnkIdent:
         var found = false
 
@@ -53,7 +51,7 @@ template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
         if not found:
           attributes.add(" " & $arg.repr)
       else:
-        discard
+        echo "unhandled expression"
 
     for styleArg in cssStyleArgs:
       var isIncluded = false
