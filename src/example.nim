@@ -45,4 +45,6 @@ html app:
       items: @["Nim", "is very", "GREAT!!!"]
     ))
 
+writeFile("index.html", app())
+
 echo app()
