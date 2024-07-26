@@ -24,7 +24,7 @@ type
     text: string
     items: seq[string]
 
-component[MyProp](MyComponent):
+component[MyProp] MyComponent:
   StyledDiv(
     bgColor="#eee",
     isBorder,
@@ -38,12 +38,16 @@ component[MyProp](MyComponent):
       for i in props.items:
         li: i
 
-html app:
-  body:
+component[void] MyOtherComponent:
+  StyledDiv:
     MyComponent(MyProp(
       text:"HELLO WORLD",
       items: @["Nim", "is very", "GREAT!!!"]
     ))
+
+html app:
+  body:
+    MyOtherComponent
 
 writeFile("index.html", app())
 
