@@ -5,7 +5,6 @@ import htmlElements, styled
 
 import types
 
-# MAIN
 template html*(name: untyped, children: untyped) =
   proc `name`*(): string =
     result = "<html>"
