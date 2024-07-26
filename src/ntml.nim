@@ -1,9 +1,5 @@
 
-import macros, strutils
-
-import htmlElements, styled
-
-import types
+import macros
 
 template html*(name: untyped, children: untyped) =
   proc `name`*(): string =
