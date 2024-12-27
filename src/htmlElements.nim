@@ -16,7 +16,7 @@ template newHtmlElement(name: untyped) =
       of nnkCall:
         attributes.add(" " & $arg.repr.replace(" ", ""))
       of nnkExprEqExpr:
-         attributes.add(" " & $arg.repr.replace(" ", ""))
+        attributes.add(" " & $arg.repr.replace(" ", ""))
       else:
         discard
 
