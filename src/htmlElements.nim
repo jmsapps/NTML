@@ -7,7 +7,7 @@ import types
 template newHtmlElement(name: untyped) =
   macro `name`*(args: varargs[untyped]): untyped =
     var children: NimNode
-    var attributes = ""
+    var attributes: string = ""
 
     for arg in args:
       case arg.kind
@@ -18,10 +18,10 @@ template newHtmlElement(name: untyped) =
       of nnkExprEqExpr:
         attributes.add(" " & $arg.repr.replace(" ", ""))
       else:
-        discard
+        children = newCall("add", ident("result"), newCall("$", arg))
 
-    let ntmlElementKind = getNtmlElementKind(name)
-    let formattedTag = astToStr(name).replace("`", "")
+    let ntmlElementKind: NtmlElementKind = getNtmlElementKind(name)
+    let formattedTag: string = astToStr(name).replace("`", "")
     var openTagStr: string
     var closeTagStr: string
 

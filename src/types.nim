@@ -1,10 +1,10 @@
 type
   NtmlTagKind* = enum
-    `img`,
-    `h1`,
-    `button`,
     `body`,
+    `button`,
     `div`,
+    `h1`,
+    `img`,
     `li`,
     `ul`
 

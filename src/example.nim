@@ -20,11 +20,11 @@ styled(StyledDiv, `div`): """
 """
 
 type
-  MyProp = object
+  MyProps = object
     text: string
     items: seq[string]
 
-component[MyProp] MyComponent:
+component[MyProps] MyComponent:
   StyledDiv(
     bgColor="#eee",
     isBorder,
@@ -37,10 +37,12 @@ component[MyProp] MyComponent:
     ul:
       for i in props.items:
         li: i
+    `div`:
+      props.text
 
 component[void] MyOtherComponent:
   StyledDiv:
-    MyComponent(MyProp(
+    MyComponent(MyProps(
       text:"HELLO WORLD",
       items: @["Nim", "is very", "GREAT!!!"]
     ))
