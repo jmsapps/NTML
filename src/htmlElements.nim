@@ -13,8 +13,6 @@ template newHtmlElement(name: untyped) =
       case arg.kind
       of nnkStmtList:
         children = arg
-      of nnkCall:
-        attributes.add(" " & $arg.repr.replace(" ", ""))
       of nnkExprEqExpr:
         attributes.add(" " & $arg.repr.replace(" ", ""))
       else:
