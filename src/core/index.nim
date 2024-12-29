@@ -9,6 +9,10 @@ template html*(name: untyped, children: untyped) =
     children
     result.add("</html>")
 
+template ntml*(name: untyped, children: untyped) =
+  proc `name`*(): string =
+    children
+
 template component*[T](name: untyped, children: untyped) =
   template `name`*(props {.inject.}: T) =
     `children`

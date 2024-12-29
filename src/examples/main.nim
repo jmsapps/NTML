@@ -1,9 +1,19 @@
 import ../ntml
 
-html app:
+component[void] Portal:
   `div`:
-    "hello world"
+    ul:
+      for i in @["1", "2"]:
+        li: "hello world"
+    `div`:
+      if 1 == 2:
+        "hello"
+      else:
+        "bye"
 
-writeFile("index.html", app())
+ntml App:
+  Portal
 
-echo app()
+writeFile("index.html", App())
+
+echo App()
