@@ -1,7 +1,8 @@
 
 import strutils
 
-import types, errors
+import ../types/index
+import ../types/errors
 
 proc parseNcss*(css: string): (string, seq[NtmlStyleArg]) =
   var styleArgs: seq[NtmlStyleArg]

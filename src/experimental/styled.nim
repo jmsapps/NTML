@@ -1,9 +1,9 @@
 
 import macros, strutils
 
-import parse, get
-
-import types
+import ../utils/parse
+import ../utils/get
+import ../types/index
 
 template styled*(name: untyped, ntmlTagKind: NtmlTagKind, style: string = "") =
   macro `name`*(args: varargs[untyped]): untyped =

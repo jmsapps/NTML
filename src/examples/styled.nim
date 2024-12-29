@@ -1,8 +1,7 @@
 import macros
 
-import ntml, htmlElements, styled
-
-import types
+import ../ntml
+import ../experimental/styled
 
 styled(StyledDiv, `div`): """
   padding: 24px;

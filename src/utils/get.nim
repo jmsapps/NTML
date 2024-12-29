@@ -1,4 +1,4 @@
-import types
+import ../types/index
 
 proc getNtmlElementKind*(ntmlTagKind: NtmlTagKind): NtmlElementKind =
   case ntmlTagKind

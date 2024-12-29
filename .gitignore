@@ -1,3 +1,5 @@
-playground
-src/*
-!src/*.nim
+playground/
+notes/
+build/
+src/examples/*
+!src/examples/*.nim

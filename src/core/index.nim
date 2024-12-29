@@ -1,8 +1,17 @@
 import macros, strutils
 
-import get
+import ../utils/get
+import ../types/index
 
-import types
+template html*(name: untyped, children: untyped) =
+  proc `name`*(): string =
+    result = "<html>"
+    children
+    result.add("</html>")
+
+template component*[T](name: untyped, children: untyped) =
+  template `name`*(props {.inject.}: T) =
+    `children`
 
 template newHtmlElement(name: untyped) =
   macro `name`*(args: varargs[untyped]): untyped =

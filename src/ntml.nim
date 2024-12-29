@@ -1,12 +1,5 @@
 
-import macros
+import core/index as core
+import types/index as types
 
-template html*(name: untyped, children: untyped) =
-  proc `name`*(): string =
-    result = "<html>"
-    children
-    result.add("</html>")
-
-template component*[T](name: untyped, children: untyped) =
-  template `name`*(props {.inject.}: T) =
-    `children`
+export core, types
