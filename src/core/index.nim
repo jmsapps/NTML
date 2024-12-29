@@ -63,10 +63,11 @@ template newHtmlElement(name: untyped) =
       result = newStmtList(newCall("add", ident("result"), newLit(openTagStr)))
 
 
-newHtmlElement `img`
-newHtmlElement `h1`
-newHtmlElement `button`
 newHtmlElement `body`
+newHtmlElement `button`
 newHtmlElement `div`
-newHtmlElement `ul`
+newHtmlElement `h1`
+newHtmlElement `img`
 newHtmlElement `li`
+newHtmlElement `p`
+newHtmlElement `ul`

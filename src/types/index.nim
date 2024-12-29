@@ -6,7 +6,8 @@ type
     `h1`,
     `img`,
     `li`,
-    `ul`
+    `p`,
+    `ul`,
 
   NtmlElementKind* = enum
     `voidElement`,
