@@ -2,48 +2,49 @@
 
 ## Project Overview
 
-NTML is a work-in-progress Nim-based framework for building HTML elements and styling them using a custom DSL (Domain Specific Language). It includes the ability to define components with styled elements and conditional styling rules.
+NTML is a Nim-based framework for building HTML elements and styles using a custom DSL (Domain Specific Language). It allows you to define reusable components, conditionally apply styles, and dynamically generate content using embedded Nim code.
 
 ## Key Features
 
-- **Component-Based Architecture**: Define reusable components using a custom `component` macro.
-- **Styled Components**: Apply styles conditionally using a custom syntax with `styled`.
-- **HTML DSL**: Create HTML elements with embedded Nim code for dynamic content generation.
+- **Component-Based Design**: Create reusable components with a straightforward `component` macro.
+- **Dynamic Scripting**: Embed Nim scripting within HTML for dynamic behavior using the `script` keyword.
+- **HTML DSL**: Define HTML structures directly in Nim with clean and intuitive syntax.
 
 ## Example Usage
 
-Below is an example demonstrating the creation of a styled component with conditional styles:
+Here is an example demonstrating how to create a reusable component with dynamic behavior and embedded scripting:
 
 ```nim
-styled(StyledDiv, `div`): """
-  padding: 24px;
+type MyProps = object
+  title: string
+  listItems: seq[string]
 
-  :ncss ${
-    IF isBorder THEN border: 1px solid #000; border-radius: 20px; ELSE VOID END
-    IF bgColor THEN background-color: bgColor; ELSE background-color: #FFF; END
-    IF isBigFont THEN font-size: 30px; ELSE VOID END
-  }$
-"""
+script:
+  let isRenderSection: bool = true
+  let currentTime: int = epochTime().toInt()
 
-type MyProp = object
-  text: string
-  items: seq[string]
+  proc handleAlert() =
+    alert(window, "You created a custom script tag")
 
-component[MyProp](MyComponent):
+component[MyProps](MyComponent):
   StyledDiv(bgColor="#eee", isBorder, isBigFont, style="margin-top: 100px;", class="myclass"):
-    h1(style="text-decoration: underline"): props.text
-    ul:
-      for i in props.items:
-        li: i
+    h1(style="text-decoration: underline"): props.title
+    `div`:
+      ul:
+        for item in props.listItems:
+          li: item
+      if isRenderSection:
+        p:
+          if currentTime mod 2 == 0:
+            "even seconds: " & currentTime.intToStr()
+          else:
+            "odd seconds: " & currentTime.intToStr()
 
-html app:
-  body:
-    MyComponent(MyProp(
-      text:"HELLO WORLD",
-      items: @["Nim", "is very", "GREAT!!!"]
-    ))
-```
+# Render the app
+ntml App:
+  MyComponent(MyProps(
+    title: "Dynamic Component",
+    listItems: @["Item 1", "Item 2", "Item 3"]
+  ))
 
-## License
-
-This project is currently private and in development. For inquiries, please contact the project author.
+render App()
