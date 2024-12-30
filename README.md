@@ -46,9 +46,7 @@ component[MyProps](MyComponent):
     let formattedTime = format(now(), "yyyy-MM-dd HH:mm:ss")
     let isEvenSeconds: bool = formattedTime.split(":")[2].parseInt() mod 2 == 0
 
-  `div`(
-    class="__read-me-container"
-  ):
+  `div`(class="__read-me-container"):
     h1(style="text-decoration: underline"): props.title
     `div`:
       button(onclick=handleAlert()):
