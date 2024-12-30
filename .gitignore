@@ -1,5 +1,7 @@
 playground/
 notes/
 build/
+dev/
 src/examples/*
 !src/examples/*.nim
+*.js

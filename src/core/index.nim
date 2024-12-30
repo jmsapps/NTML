@@ -19,14 +19,12 @@ template component*[T](name: untyped, children: untyped) =
 
 template script*(body: untyped) =
   when defined(js):
-    import dom
     {.push exportc.}
     `body`
     {.pop.}
 
 template render*(app: string) =
   when defined(js):
-    import dom
     proc renderApp() =
       let rootElement = document.createElement("div")
       rootElement.innerHTML = cstring(app)

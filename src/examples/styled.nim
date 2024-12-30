@@ -50,6 +50,13 @@ html app:
   body:
     MyOtherComponent
 
-writeFile("index.html", app())
+when defined(js):
+  echo "Compiling for JavaScript"
+
+elif defined(c):
+  echo "Compiling for C"
+
+else:
+  echo "Compiling for another target"
 
 echo app()
