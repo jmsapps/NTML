@@ -27,7 +27,7 @@ script:
     alert(window, "You created a custom script tag")
 
 component[MyProps](MyComponent):
-  `div`(bgColor="#eee", isBorder, isBigFont, style="margin-top: 100px;", class="myclass"):
+  `div`(style="margin-top: 100px;"):
     h1(style="text-decoration: underline"): props.title
     `div`:
       ul:
