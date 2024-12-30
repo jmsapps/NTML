@@ -2,35 +2,39 @@ import times, strutils
 
 import ../ntml
 
-let isAddClientReviews: bool = false
-let currentTime: int = epochTime().toInt()
+script:
+  let isAddSection: bool = true
+  let currentTime: int = epochTime().toInt()
+
+  proc handleAlert() =
+    alert(window, "You created a custom script tag")
 
 component[void] HomePage:
   `div`:
     `div`:
       `div`:
-        h1: "Featured properties"
+        h1: "Title 1"
         ul:
-          li: "Property 1"
-          li: "Property 2"
-      if isAddClientReviews:
+          for item in @["Item 1", "Item 2", "Item 3"]:
+            li: item
+      if isAddSection:
         `div`:
-          h1: "Client reviews"
+          h1: "Title 2"
           ul:
-            li: "Review 1"
-            li: "Review 2"
+            for item in @["Item 1", "Item 2", "Item 3"]:
+              li: item
       `div`:
-        h1: "A little about me..."
-        p: "With nearly two decades of experience as both a business owner and investor..."
-        p: "Throughout the years, I’ve strategically invested in and managed a portfolio of rental properties..."
-        p: "Beyond my professional pursuits, I am a devoted father to two beautiful daughters..."
-        p: "Combining my personal experiences as a parent with my expertise as a business owner..."
-        p: "Passion is the driving force behind all that I do..."
+        h1: "About"
+        p: "This is some placeholder text for the about section..."
+        p: "More information goes here in a placeholder format..."
+        p: "Even more placeholder details to fill out the page..."
+        p: "Additional placeholder text to complete this section..."
+        p: "Final placeholder statement about the section..."
       `div`:
         h1:
-          "Contact"
-        button(onclick="handleAlert"):
-          "Submit"
+          "Contact us"
+        button(onclick=handleAlert()):
+          "Click me"
   `div`:
     ul:
       for i in @["this", "is", "a", "list"]:
@@ -44,32 +48,15 @@ component[void] HomePage:
 ntml App:
   HomePage
 
+render App()
 
 when defined(js):
   echo "Compiling for JavaScript"
 
-  import dom
-
-  proc handleAlert() =
-    alert(window, cstring("Hello, this is a custom alert!"))
-
-  {.emit: """function handleAlert() { window.alert('Hello, this is a custom alert!');}"""}
-
-  proc renderApp() =
-    let rootElement = document.createElement("div") # Create a container
-    rootElement.innerHTML = App()                  # Insert the generated HTML
-    document.body.appendChild(rootElement)         # Attach to the body
-
-  # Run the rendering logic after DOMContentLoaded
-  proc onDOMContentLoaded(e: Event) =
-    renderApp()
-
-  document.addEventListener("DOMContentLoaded", onDOMContentLoaded)
-
-
 elif defined(c):
   echo "Compiling for C"
   writeFile("index.html", App())
+
 else:
   echo "Compiling for another target"
 

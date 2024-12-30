@@ -17,6 +17,28 @@ template component*[T](name: untyped, children: untyped) =
   template `name`*(props {.inject.}: T) =
     `children`
 
+template script*(body: untyped) =
+  when defined(js):
+    import dom
+    {.push exportc.}
+    `body`
+    {.pop.}
+
+template render*(app: string) =
+  when defined(js):
+    import dom
+    proc renderApp() =
+      let rootElement = document.createElement("div")
+      rootElement.innerHTML = cstring(app)
+      document.body.appendChild(rootElement)
+
+    proc onDOMContentLoaded(e: Event) =
+      renderApp()
+
+    document.addEventListener("DOMContentLoaded", onDOMContentLoaded)
+
+    echo "successfully rendered app!"
+
 template newHtmlElement(name: untyped) =
   macro `name`*(args: varargs[untyped]): untyped =
     var children: NimNode
@@ -61,7 +83,6 @@ template newHtmlElement(name: untyped) =
       openTagStr = "<" & formattedTag & attributes & "/>"
 
       result = newStmtList(newCall("add", ident("result"), newLit(openTagStr)))
-
 
 newHtmlElement `body`
 newHtmlElement `button`
