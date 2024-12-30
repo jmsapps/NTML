@@ -48,3 +48,20 @@ ntml App:
   ))
 
 render App()
+```
+
+Output:
+
+```html
+<div style="margin-top:100px;">
+   <h1 style="text-decoration:underline">Dynamic Component</h1>
+   <div>
+      <ul>
+         <li>Item 1</li>
+         <li>Item 2</li>
+         <li>Item 3</li>
+      </ul>
+      <p>odd seconds: 1735521679</p>
+   </div>
+</div>
+```
