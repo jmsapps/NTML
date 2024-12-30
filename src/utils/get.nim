@@ -9,7 +9,8 @@ proc getNtmlElementKind*(ntmlTagKind: NtmlTagKind): NtmlElementKind =
     `button`,
     `h1`,
     `li`,
-    `p`:
+    `p`,
+    `style`:
       result = `atomicElement`
   of
     `body`,

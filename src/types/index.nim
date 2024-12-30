@@ -7,6 +7,7 @@ type
     `img`,
     `li`,
     `p`,
+    `style`,
     `ul`,
 
   NtmlElementKind* = enum

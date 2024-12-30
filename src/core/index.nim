@@ -35,7 +35,7 @@ template render*(app: string) =
 
     document.addEventListener("DOMContentLoaded", onDOMContentLoaded)
 
-    echo "successfully rendered app!"
+    echo "Successfully rendered app!"
 
 template newHtmlElement(name: untyped) =
   macro `name`*(args: varargs[untyped]): untyped =
@@ -89,4 +89,5 @@ newHtmlElement `h1`
 newHtmlElement `img`
 newHtmlElement `li`
 newHtmlElement `p`
+newHtmlElement `style`
 newHtmlElement `ul`

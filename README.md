@@ -15,36 +15,58 @@ NTML is a Nim-based framework for building HTML elements and styles using a cust
 Here is an example demonstrating how to create a reusable component with dynamic behavior and embedded scripting:
 
 ```nim
+import times, strutils
+
+import ../ntml
+
 type MyProps = object
   title: string
   listItems: seq[string]
 
-script:
-  let isRenderSection: bool = true
-  let currentTime: int = epochTime().toInt()
-
-  proc handleAlert() =
-    alert(window, "You created a custom script tag")
-
 component[MyProps](MyComponent):
-  `div`(style="margin-top: 100px;"):
+  style: """
+    .__read-me-container {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  """
+
+  script:
+    proc handleAlert() =
+      alert(window, "This is an NTML-generated alert!")
+
+    let currentTime: int = epochTime().toInt()
+    let formattedTime = format(now(), "yyyy-MM-dd HH:mm:ss")
+    let isEvenSeconds: bool = formattedTime.split(":")[2].parseInt() mod 2 == 0
+
+  `div`(
+    class="__read-me-container"
+  ):
     h1(style="text-decoration: underline"): props.title
     `div`:
+      button(onclick=handleAlert()):
+        "Click me to display an alert"
       ul:
         for item in props.listItems:
           li: item
-      if isRenderSection:
-        p:
-          if currentTime mod 2 == 0:
-            "even seconds: " & currentTime.intToStr()
-          else:
-            "odd seconds: " & currentTime.intToStr()
+      if isEvenSeconds:
+        p(style="color: rgb(0, 18, 221)"):
+          "Even seconds: " & formattedTime
+      else:
+        p(style="color:rgb(221, 0, 0)"):
+          "Odd seconds: " & formattedTime
 
-# Render the app
 ntml App:
   MyComponent(MyProps(
-    title: "Dynamic Component",
-    listItems: @["Item 1", "Item 2", "Item 3"]
+    title: "NTML Example",
+    listItems: @["NTML", "IS", "VERY", "GREAT!!!"]
   ))
 
 render App()
@@ -53,15 +75,30 @@ render App()
 Output:
 
 ```html
-<div style="margin-top:100px;">
-   <h1 style="text-decoration:underline">Dynamic Component</h1>
+<style>
+  .__read-me-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+<div class="__read-me-container">
+   <h1 style="text-decoration:underline">NTML Example</h1>
    <div>
+      <button onclick=handleAlert()>Click me to display an alert</button>
       <ul>
-         <li>Item 1</li>
-         <li>Item 2</li>
-         <li>Item 3</li>
+         <li>NTML</li>
+         <li>IS</li>
+         <li>VERY</li>
+         <li>GREAT!!!</li>
       </ul>
-      <p>odd seconds: 1735521679</p>
+      <p style="color:rgb(0, 18, 221)">Even seconds: 2024-12-30 15:00:40</p>
    </div>
 </div>
 ```

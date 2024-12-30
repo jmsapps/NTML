@@ -6,32 +6,50 @@ type MyProps = object
   title: string
   listItems: seq[string]
 
-let isRenderSection: bool = true
-let currentTime: int = epochTime().toInt()
-
-script:
-  proc handleAlert() =
-    alert(window, "You created a custom script tag")
-
 component[MyProps](MyComponent):
-  `div`(style="margin-top: 100px;"):
+  style: """
+    .__read-me-container {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  """
+
+  script:
+    proc handleAlert() =
+      alert(window, "This is an NTML-generated alert!")
+
+    let currentTime: int = epochTime().toInt()
+    let formattedTime = format(now(), "yyyy-MM-dd HH:mm:ss")
+    let isEvenSeconds: bool = formattedTime.split(":")[2].parseInt() mod 2 == 0
+
+  `div`(
+    class="__read-me-container"
+  ):
     h1(style="text-decoration: underline"): props.title
     `div`:
+      button(onclick=handleAlert()):
+        "Click me to display an alert"
       ul:
         for item in props.listItems:
           li: item
-      if isRenderSection:
-        p:
-          if currentTime mod 2 == 0:
-            "even seconds: " & currentTime.intToStr()
-          else:
-            "odd seconds: " & currentTime.intToStr()
+      if isEvenSeconds:
+        p(style="color: rgb(0, 18, 221)"):
+          "Even seconds: " & formattedTime
+      else:
+        p(style="color:rgb(221, 0, 0)"):
+          "Odd seconds: " & formattedTime
 
-# Render the app
 ntml App:
   MyComponent(MyProps(
-    title: "Dynamic Component",
-    listItems: @["Item 1", "Item 2", "Item 3"]
+    title: "NTML Example",
+    listItems: @["NTML", "IS", "VERY", "GREAT!!!"]
   ))
 
-echo App()
+render App()
