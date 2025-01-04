@@ -18,24 +18,22 @@ template component*[T](name: untyped, children: untyped) =
     `children`
 
 template script*(body: untyped) =
-  when defined(js):
-    {.push exportc.}
-    `body`
-    {.pop.}
+  {.push exportc.}
+  `body`
+  {.pop.}
 
 template render*(app: string) =
-  when defined(js):
-    proc renderApp() =
-      let rootElement = document.createElement("div")
-      rootElement.innerHTML = cstring(app)
-      document.body.appendChild(rootElement)
+  proc renderApp() =
+    let rootElement = document.createElement("div")
+    rootElement.innerHTML = cstring(app)
+    document.body.appendChild(rootElement)
 
-    proc onDOMContentLoaded(e: Event) =
-      renderApp()
+  proc onDOMContentLoaded(e: Event) =
+    renderApp()
 
-    document.addEventListener("DOMContentLoaded", onDOMContentLoaded)
+  document.addEventListener("DOMContentLoaded", onDOMContentLoaded)
 
-    echo "Successfully rendered app!"
+  echo "Successfully rendered app!"
 
 template newHtmlElement(name: untyped) =
   macro `name`*(args: varargs[untyped]): untyped =
