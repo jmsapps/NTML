@@ -1,7 +1,7 @@
-import macros, strutils
+import macros, strutils, dom
 
-import ../utils/get
-import ../types/index
+import ../utils/get as get
+import ../types/index as types
 
 template html*(name: untyped, children: untyped) =
   proc `name`*(): string =
@@ -89,3 +89,5 @@ newHtmlElement `li`
 newHtmlElement `p`
 newHtmlElement `style`
 newHtmlElement `ul`
+
+export dom, types
