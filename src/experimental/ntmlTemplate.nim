@@ -1,15 +1,21 @@
-
 template ntmlTemplate*[T](name: untyped, children: untyped) =
   template `name`*(props {.inject.}: T) =
-    result = "<template id=\"" & astToStr(`name`) & "_ntml_component_template\">"
+    result = "<div id=\"" & astToStr(`name`) & "_ntml_component_template_container\">"
+    result.add("<template id=\"" & astToStr(`name`) & "_ntml_component_template\">")
     `children`
     result.add("</template>")
+    result.add("</div>")
 
     proc renderTemplate() =
-      let templ = document.getElementById(astToStr(`name`) & "_ntml_component_template")
+      let containerId = cstring(astToStr(`name`) & "_ntml_component_template_container")
+      let templateId = cstring(astToStr(`name`) & "_ntml_component_template")
+
+      let container = document.getElementById(containerId)
+      let templ = document.getElementById(templateId)
+
       if templ.content != nil:
         let clone = templ.content.cloneNode(true)
-        document.body.appendChild(clone)
+        container.appendChild(clone)
 
     proc onDOMContentLoaded(e: Event) =
       renderTemplate()
