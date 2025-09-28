@@ -150,17 +150,28 @@ makeTag `button`
 makeTag `br`
 makeTag `ul`
 makeTag `li`
+makeTag `style`
 
 
 when isMainModule:
   var count: Signal[int] = signal(0)
   let doubled = derived(count, proc (x: int): string = $(x*2))
 
+  let styleTag =
+    style:
+      """
+        ._div_container_87897126 {
+          background-color: #eee;
+          padding: 12px;
+          border-radius: 8px;
+        }
+      """
+
   let component =
-    d(id="hero", className="wrap"):
+    d(id="hero", class="_div_container_87897126"):
       "Count: "; count; br(); "Doubled: "; doubled; br(); br();
       button(
-        className="btn",
+        class="btn",
         onClick = proc (e: Event) = set(count, get(count) + 1)
       ): "Increment"
 
@@ -169,4 +180,5 @@ when isMainModule:
         li: derived(count, proc (x: int): string = $(x*2 + 2))
         li: derived(count, proc (x: int): string = $(x*2 + 3))
 
+  discard jsAppendChild(document.head, styleTag)
   discard jsAppendChild(document.body, component)
