@@ -23,6 +23,9 @@ let person: Person = Person(name: "Charlie", age: 40, trait: Trait(eye_color: "g
 
 let count: int = 0
 
+# dumpTree:
+#   `div`:
+#     ("Nim ", "is ", "really ", "great!")
 
 dumpTree:
   h1:
@@ -42,4 +45,3 @@ dumpTree:
 
     for i, idx in [1, 2, 3]:
       (i, " ", $idx) ; idx ; %%count.kind ; $"HELLO" ; $person.name
-

@@ -1,22 +1,47 @@
-import macros
+import macros, strutils, dom
 
 template newHtmlElement(name: untyped) =
-  macro `name`*(nodes: varargs[untyped]) =
-    for node in nodes:
-      case node.kind
-      of nnkTupleConstr:
-        for n in node:
-          echo "HERE"
-          # echo newCall(n).kind, " ", n.repr
-          echo " "
-      of nnkCall:
-        echo "CALL callee=", node[0].repr
-        for i in 1 ..< node.len:
-          echo newCall(node[i]).repr
-      else:
-        echo newCall(node).kind, " ", node.repr
-        echo " "
+  macro `name`*(nodes: varargs[untyped]): untyped =
+    let tag = astToStr(name).replace("`","")
+    let el  = genSym(nskLet, tag)
+    let stmts = newStmtList()
 
+    # let el = document.createElement(tag)
+    stmts.add newLetStmt(
+      el,
+      newCall(newDotExpr(ident"document", ident"createElement"), newLit(tag))
+    )
+
+    proc addChildren(n: NimNode) =
+      case n.kind
+      of nnkTupleConstr, nnkPar:
+        for it in n:
+          addChildren(it)
+
+      of nnkStmtList, nnkStmtListExpr, nnkBlockStmt:
+        for it in n:
+          addChildren(it)
+
+      else:
+        # el.appendChild(document.createTextNode($expr))
+        stmts.add newCall(
+          newDotExpr(el, ident"appendChild"),
+          newCall(
+            newDotExpr(ident"document", ident"createTextNode"),
+            newCall(ident"cstring", newCall(ident"$", n))    # ensure non-strings stringify
+          )
+        )
+
+    for n in nodes:
+      addChildren(n)
+
+    # document.body.appendChild(el)
+    stmts.add newCall(
+      newDotExpr(newDotExpr(ident"document", ident"body"), ident"appendChild"),
+      el
+    )
+
+    result = stmts
 
 newHtmlElement `div`
 newHtmlElement `h1`
@@ -26,7 +51,6 @@ newHtmlElement `p`
 type
   Trait = object
     eye_color: string
-
   Person = object
     name: string
     age: int
@@ -39,16 +63,9 @@ let people: seq[Person] = @[
 ]
 
 proc ntml() =
+  p:
+    "hello"
   `div`:
-    # p: "hello"
-    for person in people:
-      p: (person.name, " is ", person.age, "eye color ", person.trait.eye_color)
-    # for i in ["1", "2", "3"]:
-    #   p:
-    #     ("hello", i); p: 1; ("hello", i)
-    #   for i, idx in [2, 4, 6]:
-    #     p:
-    #       idx
-    # for i in [1, 2, 3]:
-    #   h1: i
+    ("Nim ", "is ", "really ", "great! ", people[0].name)
+
 ntml()
