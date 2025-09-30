@@ -5,33 +5,43 @@ type
   Unsub* = proc ()
   Subscriber*[T] = proc (v: T)
   Signal*[T] = ref object
-    v: T
+    value: T
     subs: seq[Subscriber[T]]
 
 proc signal*[T](initial: T): Signal[T] =
-  new(result); result.v = initial; result.subs = @[]
+  new(result)
+  result.value = initial
+  result.subs = @[]
 
-proc get*[T](s: Signal[T]): T = s.v
+proc get*[T](src: Signal[T]): T =
+  src.value
 
-proc set*[T](s: Signal[T], nv: T) =
-  if nv != s.v:
-    s.v = nv
-    for f in s.subs: f(nv)
+proc set*[T](src: Signal[T], newValue: T) =
+  if newValue != src.value:
+    src.value = newValue
 
-proc sub*[T](s: Signal[T], f: Subscriber[T]): Unsub =
-  s.subs.add f
-  f(s.v)
+    for f in src.subs:
+      f(newValue)
+
+proc sub*[T](src: Signal[T], fn: Subscriber[T]): Unsub =
+  src.subs.add(fn)
+  fn(src.value)
+
   result = proc() =
-    var i = -1
-    for idx, g in s.subs:
-      when compiles(g == f):
-        if g == f: i = idx; break
-    if i >= 0: s.subs.delete(i)
+    var i: int = -1
 
-proc derived*[A, B](s: Signal[A], fn: proc(a: A): B): Signal[B] =
-  let sigOut = signal[B](fn(s.v))
-  discard s.sub(proc(a: A) = sigOut.set(fn(a)))
-  sigOut
+    for idx, g in src.subs:
+      if g == fn:
+        i = idx
+        break
+
+    if i >= 0:
+      src.subs.delete(i)
+
+proc derived*[A, B](src: Signal[A], fn: proc(a: A): B): Signal[B] =
+  let signalOut = signal[B](fn(src.value))
+  discard src.sub(proc(a: A) = signalOut.set(fn(a)))
+  signalOut
 
 # ------------------- JS DOM shims -------------------
 proc jsCreateElement*(s: cstring): Node {.importjs: "document.createElement(#)".}
