@@ -110,6 +110,24 @@ template mountIf*(parent: Node, cond: Signal[bool], thenN, elseN: untyped) =
     derived(cond, proc (v: bool): auto = (if v: thenN else: elseN))
   )
 
+template mountCase*[T](parent: Node, disc: T, body: untyped) =
+  block:
+    let tmp {.inject.} = disc
+    mountChild(parent, (block:
+      let caseDisc {.inject.} = tmp
+      body
+    ))
+
+template mountCase*[T](parent: Node, disc: Signal[T], body: untyped) =
+  mountChild(parent,
+    derived(disc, proc(v: T): auto = (block:
+      let caseDisc {.inject.} = v
+      body
+    ))
+  )
+
+
+
 template makeTag(name: untyped) =
   macro `name`*(args: varargs[untyped]): untyped =
     var tagName = astToStr(name).replace("`","")
@@ -147,8 +165,10 @@ template makeTag(name: untyped) =
           (if body.kind == nnkStmtList and body.len > 0: body[^1] else: body)
 
         var hasElif = false
+
         for k, br in node:
-          if k > 0 and br.kind == nnkElifBranch: hasElif = true
+          if k > 0 and br.kind == nnkElifBranch:
+            hasElif = true
 
         if hasElif:
           let ifNode = newTree(nnkIfStmt)
@@ -162,6 +182,7 @@ template makeTag(name: untyped) =
             else: discard
 
           result = ifNode
+
         else:
           let head = node[0]
           let cond = head[0]
@@ -174,24 +195,31 @@ template makeTag(name: untyped) =
           # Defer dispatch (bool vs Signal[bool]) to overload resolution
           result = newCall(ident"mountIf", parent, cond, thenExpr, elseExpr)
 
+
       of nnkCaseStmt:
+        proc toExpr(body: NimNode): NimNode {.compileTime.} =
+          (if body.kind == nnkStmtList and body.len > 0: body[^1] else: body)
+
         let disc = node[0]
-        let lowered = newTree(nnkCaseStmt, disc)
+        let sel  = ident"caseDisc"     # this matches the injected name above
+
+        let caseNode = newTree(nnkCaseStmt, sel)
         for br in node[1..^1]:
           case br.kind
           of nnkOfBranch:
-            let lits = br[0..^2]      # branch values
-            let body = br[^1]         # last child is body
             var branch = newTree(nnkOfBranch)
-            for lit in lits:
+            for lit in br[0..^2]:
               branch.add lit
-            branch.add lowerMount(parent, body)
-            lowered.add branch
+            branch.add toExpr(br[^1])
+            caseNode.add branch
           of nnkElse:
-            lowered.add newTree(nnkElse, lowerMount(parent, br[0]))
-          else:
-            discard
-        result = lowered
+            caseNode.add newTree(nnkElse, toExpr(br[0]))
+          else: discard
+
+        result = newCall(ident"mountCase", parent, disc, caseNode)
+
+
+
 
       of nnkForStmt, nnkWhileStmt:
         let loop = copy node
@@ -253,6 +281,9 @@ when isMainModule:
   let isEven: Signal[system.bool] = derived(count, proc (x: int): bool =
     if x mod 2 == 0: true else: false
   )
+  var name: Signal[string] =  derived(isEven, proc (x: bool): string =
+    if x == true: "Jebbrel" else: "Almanda"
+  )
 
   let styleTag =
     style:
@@ -282,11 +313,11 @@ when isMainModule:
       else:
         b: "ODD"
 
-      case isEven.get():
-      of true:
-        h1: "CASE EVEN"
+      case name:
+      of "Jebbrel":
+        h1: "Jebbrel"
       else:
-        h1: "CASE ODD"
+        h1: "Almanda"
 
       ul:
         for i in 1..3:
