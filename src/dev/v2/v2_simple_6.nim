@@ -2,8 +2,8 @@ import macros, dom, strutils
 
 # ------------------- Signals -------------------
 type
-  Unsub* = proc () {.gcsafe.}
-  Subscriber*[T] = proc (v: T) {.gcsafe.}
+  Unsub* = proc ()
+  Subscriber*[T] = proc (v: T)
   Signal*[T] = ref object
     v: T
     subs: seq[Subscriber[T]]
@@ -28,67 +28,67 @@ proc sub*[T](s: Signal[T], f: Subscriber[T]): Unsub =
         if g == f: i = idx; break
     if i >= 0: s.subs.delete(i)
 
-proc derived*[A, B](s: Signal[A], fn: proc(a: A): B {.gcsafe.}): Signal[B] =
+proc derived*[A, B](s: Signal[A], fn: proc(a: A): B): Signal[B] =
   let sigOut = signal[B](fn(s.v))
-  discard s.sub(proc(a: A) {.gcsafe.} = sigOut.set(fn(a)))
+  discard s.sub(proc(a: A) = sigOut.set(fn(a)))
   sigOut
 
-# ------------------- JS DOM shims (GC-safe) -------------------
-proc jsCreateElement*(s: cstring): Node {.importjs: "document.createElement(#)", gcsafe.}
-proc jsCreateTextNode*(s: cstring): Node {.importjs: "document.createTextNode(#)", gcsafe.}
-proc jsAppendChild*(p: Node, c: Node): Node {.importjs: "#.appendChild(#)", gcsafe.}
-proc jsRemoveChild*(p: Node, c: Node): Node {.importjs: "#.removeChild(#)", gcsafe.}
-proc jsInsertBefore*(p: Node, newChild: Node, refChild: Node): Node {.importjs: "#.insertBefore(#,#)", gcsafe.}
-proc jsSetAttribute*(el: Node, k: cstring, v: cstring) {.importjs: "#.setAttribute(#,#)", gcsafe.}
+# ------------------- JS DOM shims -------------------
+proc jsCreateElement*(s: cstring): Node {.importjs: "document.createElement(#)".}
+proc jsCreateTextNode*(s: cstring): Node {.importjs: "document.createTextNode(#)".}
+proc jsAppendChild*(p: Node, c: Node): Node {.importjs: "#.appendChild(#)".}
+proc jsRemoveChild*(p: Node, c: Node): Node {.importjs: "#.removeChild(#)".}
+proc jsInsertBefore*(p: Node, newChild: Node, refChild: Node): Node {.importjs: "#.insertBefore(#,#)".}
+proc jsSetAttribute*(el: Node, k: cstring, v: cstring) {.importjs: "#.setAttribute(#,#)".}
 proc jsAddEventListener*(el: Node, t: cstring, cb: proc (e: Event)) {.importjs: "#.addEventListener(#,#)".}
 
 # ------------------- DOM helpers -------------------
-proc el*(tag: string, props: openArray[(string, string)] = [], children: varargs[Node]): Node {.gcsafe.} =
+proc el*(tag: string, props: openArray[(string, string)] = [], children: varargs[Node]): Node =
   let element = jsCreateElement(cstring(tag))
   for (k, v) in props:
     if v.len > 0: jsSetAttribute(element, cstring(k), cstring(v))
   for c in children: discard jsAppendChild(element, c)
   element
 
-proc toNode*(n: Node): Node {.gcsafe.} = n
-proc toNode*(s: string): Node {.gcsafe.} = jsCreateTextNode(cstring(s))
-proc toNode*(s: cstring): Node {.gcsafe.} = jsCreateTextNode(s)
-proc toNode*(x: int): Node {.gcsafe.} = jsCreateTextNode(cstring($x))
-proc toNode*(x: float): Node {.gcsafe.} = jsCreateTextNode(cstring($x))
-proc toNode*(x: bool): Node {.gcsafe.} = jsCreateTextNode(cstring($x))
+proc toNode*(n: Node): Node = n
+proc toNode*(s: string): Node = jsCreateTextNode(cstring(s))
+proc toNode*(s: cstring): Node = jsCreateTextNode(s)
+proc toNode*(x: int): Node = jsCreateTextNode(cstring($x))
+proc toNode*(x: float): Node = jsCreateTextNode(cstring($x))
+proc toNode*(x: bool): Node = jsCreateTextNode(cstring($x))
 
-proc removeBetween*(parent: Node, startN, endN: Node) {.gcsafe.} =
+proc removeBetween*(parent: Node, startN, endN: Node) =
   var n = startN.nextSibling
   while n != endN and n != nil:
     let nxt = n.nextSibling
     discard jsRemoveChild(parent, n)
     n = nxt
 
-proc mountChild*(parent: Node, child: Node) {.gcsafe.} =
+proc mountChild*(parent: Node, child: Node) =
   discard jsAppendChild(parent, child)
-proc mountChild*(parent: Node, child: string) {.gcsafe.} =
+proc mountChild*(parent: Node, child: string) =
   discard jsAppendChild(parent, jsCreateTextNode(cstring(child)))
-proc mountChild*(parent: Node, child: cstring) {.gcsafe.} =
+proc mountChild*(parent: Node, child: cstring) =
   discard jsAppendChild(parent, jsCreateTextNode(child))
-proc mountChild*(parent: Node, child: int) {.gcsafe.} =
+proc mountChild*(parent: Node, child: int) =
   discard jsAppendChild(parent, jsCreateTextNode(cstring($child)))
-proc mountChild*(parent: Node, child: float) {.gcsafe.} =
+proc mountChild*(parent: Node, child: float) =
   discard jsAppendChild(parent, jsCreateTextNode(cstring($child)))
-proc mountChild*(parent: Node, child: bool) {.gcsafe.} =
+proc mountChild*(parent: Node, child: bool) =
   discard jsAppendChild(parent, jsCreateTextNode(cstring($child)))
 
-proc mountChild*[T](parent: Node, s: Signal[T]) {.gcsafe.} =
+proc mountChild*[T](parent: Node, s: Signal[T]) =
   let startN = jsCreateTextNode(cstring(""))
   let endN   = jsCreateTextNode(cstring(""))
   discard jsAppendChild(parent, startN)
   discard jsAppendChild(parent, endN)
 
-  proc render(v: T) {.gcsafe.} =
+  proc render(v: T) =
     removeBetween(parent, startN, endN)
     discard jsInsertBefore(parent, toNode(v), endN)
 
   render(s.get())
-  discard s.sub(proc(v: T) {.gcsafe.} = render(v))
+  discard s.sub(proc(v: T) = render(v))
 
 template makeTag(name: untyped) =
   macro `name`*(args: varargs[untyped]): untyped =
@@ -201,7 +201,7 @@ when isMainModule:
         }
       """
 
-  let component =
+  let component: Node =
     d(id="hero", class="_div_container_87897126"):
       "Count: "; count; br(); "Doubled: "; doubled; br(); br();
       button(
