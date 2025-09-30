@@ -131,6 +131,25 @@ template makeTag(name: untyped) =
           else: discard
         result = sigOut
 
+      of nnkCaseStmt:
+        let disc = node[0]
+        let lowered = newTree(nnkCaseStmt, disc)
+        for br in node[1..^1]:
+          case br.kind
+          of nnkOfBranch:
+            let lits = br[0..^2]      # branch values
+            let body = br[^1]         # last child is body
+            var branch = newTree(nnkOfBranch)
+            for lit in lits:
+              branch.add lit
+            branch.add lowerMount(parent, body)
+            lowered.add branch
+          of nnkElse:
+            lowered.add newTree(nnkElse, lowerMount(parent, br[0]))
+          else:
+            discard
+        result = lowered
+
       of nnkForStmt, nnkWhileStmt:
         let loop = copy node
         loop[^1] = lowerMount(parent, node[^1])
@@ -206,7 +225,7 @@ when isMainModule:
       "Count: "; count; br(); "Doubled: "; doubled; br(); br();
       button(
         class="btn",
-        onClick = proc (e: Event) = set(count, get(count) + 1)
+        onClick = proc (e: Event) = count.set(count.get() + 1)
       ): "Increment"
 
       ul:
@@ -218,6 +237,12 @@ when isMainModule:
         derived(isEven, proc (b: bool): string =
           if b: "Even" else: "Odd"
         )
+
+      case isEven.get():
+      of true:
+        h1: "CASE EVEN"
+      else:
+        h1: "CASE ODD"
 
       ul:
         for i in 1..3:
